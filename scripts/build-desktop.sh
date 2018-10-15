@@ -160,16 +160,16 @@ function compile() {
             -DEXTERNAL_MODULES_DIR="$EXTERNAL_MODULES_DIR" \
             -DDESKTOP_FONTS="$DESKTOP_FONTS" \
             -DJS_BUNDLE_PATH="$JS_BUNDLE_PATH" \
-            -DCMAKE_CXX_FLAGS:='-DBUILD_FOR_BUNDLE=1'
+            -DCMAKE_CXX_FLAGS:='-DBUILD_FOR_BUNDLE=1' || exit 1
     else
       cmake -Wno-dev \
             -DCMAKE_BUILD_TYPE=Release \
             -DEXTERNAL_MODULES_DIR="$EXTERNAL_MODULES_DIR" \
             -DDESKTOP_FONTS="$DESKTOP_FONTS" \
             -DJS_BUNDLE_PATH="$JS_BUNDLE_PATH" \
-            -DCMAKE_CXX_FLAGS:='-DBUILD_FOR_BUNDLE=1'
+            -DCMAKE_CXX_FLAGS:='-DBUILD_FOR_BUNDLE=1' || exit 1
     fi
-    make
+    make || exit 1
   popd
 }
 

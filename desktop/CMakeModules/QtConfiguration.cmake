@@ -11,11 +11,14 @@ if(WIN32)
 
   conan_check()
 
+  if(USE_QTWEBKIT)
+    set(_QT_PACKAGE_OPTIONS "qt5-mxe:webkit=True")
+  endif()
   conan_cmake_run(REQUIRES qt5-mxe/5.11.2@status-im/experimental
                   PROFILE $ENV{STATUS_REACT_HOME}/../status-conan/profiles/status-mxe-mingw32-x86_64-gcc55-libstdcxx # TODO Remove hardcoded path
                   BASIC_SETUP
                   SETTINGS "qt5-mxe:os=Windows qt5-mxe:arch=x86_64"
-                  OPTIONS "qt5-mxe:webkit=True"
+                  OPTIONS ${_QT_PACKAGE_OPTIONS}
                   BUILD missing outdated)
 
   set(QTROOT "${CONAN_QT5-MXE_ROOT}/gcc_64")
@@ -64,10 +67,7 @@ if(QT5_CFLAGS)
   endif(WIN32)
 endif(QT5_CFLAGS)
 
-# message(STATUS "Qt version: ${Qt5Core_VERSION_STRING}")
+message(STATUS "Qt version: ${Qt5Core_VERSION_STRING}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${QT5_CFLAGS}")
-# message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
-# message("QT5_LIBRARIES=${QT5_LIBRARIES}")
 
-#set(CMAKE_REQUIRED_INCLUDES ${Qt5WebEngine_INCLUDE_DIRS};${Qt5WebEngine_PRIVATE_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_LIBRARIES ${QT5_LIBRARIES})

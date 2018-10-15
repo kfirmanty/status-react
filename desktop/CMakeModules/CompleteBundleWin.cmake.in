@@ -1,7 +1,7 @@
 # windeployqt should be used here, but since we get the `Not implemented` error from it, we're trying to manually copy artifacts to output directory
-set(TARGET_DIR $<TARGET_FILE_DIR:${APP_NAME}>)
+set(TARGET_DIR "${@APP_NAME@_BINARY_DIR}")
 
-set(qtmodules Core Gui Widgets Qml Quick QuickControls2 QuickTemplates2 WebSockets OpenGL Svg Network Concurrent Positioning SerialPort)
+set(qtmodules Core Quick QuickTemplates2 QuickControls2 WebSockets Widgets Gui Network Svg Qml Concurrent)
 if(USE_QTWEBKIT)
   set(qtmodules ${qtmodules} Multimedia WebKit WebKitWidgets WebChannel)
 
@@ -11,32 +11,27 @@ if(USE_QTWEBKIT)
           ${TARGET_DIR})
 endif()
 foreach(qtmodule ${qtmodules})
-  message("Copying ${qtmodule} module")
-  add_custom_command(TARGET @APP_NAME@ POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          "@CONAN_BIN_DIRS_QT5-MXE@/Qt5${qtmodule}.dll"
-          ${TARGET_DIR})
+  message(STATUS "Copying ${qtmodule} module to ${TARGET_DIR}")
+  file(COPY "@CONAN_BIN_DIRS_QT5-MXE@/Qt5${qtmodule}.dll" DESTINATION "${TARGET_DIR}")
 endforeach(qtmodule ${qtmodules})
+if(EXISTS "@QTROOT@/translations")
+  message(STATUS "Copying translations module to ${TARGET_DIR}")
+  file(COPY "@QTROOT@/translations" DESTINATION "${TARGET_DIR}")
+endif()
 
-set(qtplugindirs "platforms" "styles" "iconengines" "imageformats" "translations")
+set(qtplugindirs "platforms" "styles" "iconengines" "imageformats")
 foreach(qtplugindir ${qtplugindirs})
-  message("Copying plugin ${qtplugindir}")
-  add_custom_command(TARGET @APP_NAME@ POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "@CONAN_BIN_DIRS_QT5-MXE@/../plugins/${qtplugindir}/"
-        "${TARGET_DIR}/${qtplugindir}")
+  message(STATUS "Copying plugin ${qtplugindir} to ${TARGET_DIR}/${qtplugindir}")
+  file(COPY "@CONAN_BIN_DIRS_QT5-MXE@/../plugins/${qtplugindir}/" DESTINATION "${TARGET_DIR}/${qtplugindir}")
 endforeach()
 
-set(qtqmldirs "QtQuick" "QtQuick.2" "QtGraphicalEffects" "QtPositioning" "QtWebSockets")
+set(qtqmldirs "QtQuick" "QtQuick.2" "QtGraphicalEffects" "QtWebSockets" "QtQml")
 if(USE_QTWEBKIT)
   set(qtqmldirs ${qtqmldirs} "QtWebKit" "QtWebChannel")
 endif()
 foreach(qtqmldir ${qtqmldirs})
-  message("Copying QML dir for ${qtqmldir}")
-  add_custom_command(TARGET @APP_NAME@ POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "@CONAN_BIN_DIRS_QT5-MXE@/../qml/${qtqmldir}/"
-        "${TARGET_DIR}/${qtqmldir}")
+  message(STATUS "Copying QML dir for ${qtqmldir} to ${TARGET_DIR}/${qtqmldir}")
+  file(COPY "@CONAN_BIN_DIRS_QT5-MXE@/../qml/${qtqmldir}/" DESTINATION "${TARGET_DIR}/${qtqmldir}")
 endforeach()
 
 set(deps_qt5 "libpng16-16" "libharfbuzz-0" "zlib1" "libpcre2-16-0"
@@ -48,8 +43,6 @@ foreach(lib ${deps_qt5})
   if(NOT EXISTS "${lib_full_path}")
     set(lib_full_path "@CONAN_BIN_DIRS_QT5-MXE@/${lib}.dll") 
   endif()
-  add_custom_command(TARGET @APP_NAME@ POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      ${lib_full_path}
-      ${TARGET_DIR})
+  message(STATUS "Copying ${lib_full_path} to ${TARGET_DIR}")
+  file(COPY ${lib_full_path} DESTINATION ${TARGET_DIR})
 endforeach(lib ${deps_qt5})
